@@ -1,0 +1,177 @@
+model cities {
+  code               String               @id @db.VarChar(5)
+  name               String               @db.VarChar(100)
+  un_locode          String               @db.VarChar(50)
+  latitude           Int
+  longitude          Int
+  alt                Int
+  timezone           String               @db.VarChar(50)
+  country_code       String               @db.VarChar(5)
+  countries          countries            @relation(fields: [country_code], references: [code], onDelete: SetNull, onUpdate: Cascade)
+  cities_translation cities_translation[]
+  location           location[]
+
+  @@index([country_code], map: "cities_country_code_fkey")
+}
+
+model cities_translation {
+  city_code String @db.VarChar(5)
+  locale    String @db.VarChar(5)
+  city_name String
+  cities    cities @relation(fields: [city_code], references: [code])
+
+  @@id([city_code, locale])
+}
+
+model location {
+  id                   String                 @id
+  city_code            String?                @db.VarChar(5)
+  vendor_id            String                 @db.VarChar(2)
+  oag_code             String?
+  country_code         String?                @db.VarChar(5)
+  state                String?
+  zip_code             String?
+  phone                String?
+  alt_phone            String?
+  fax                  String?
+  telex                String?
+  web_url              String?
+  email                String?
+  latitude             String
+  longitude            String
+  open_1_mon           String?
+  close_1_mon          String?
+  open_2_mon           String?
+  close_2_mon          String?
+  open_3_mon           String?
+  close_3_mon          String?
+  open_1_tue           String?
+  close_1_tue          String?
+  open_2_tue           String?
+  close_2_tue          String?
+  open_3_tue           String?
+  close_3_tue          String?
+  open_1_wed           String?
+  close_1_wed          String?
+  open_2_wed           String?
+  close_2_wed          String?
+  open_3_wed           String?
+  close_3_wed          String?
+  open_1_thu           String?
+  close_1_thu          String?
+  open_2_thu           String?
+  close_2_thu          String?
+  open_3_thu           String?
+  close_3_thu          String?
+  open_1_fri           String?
+  close_1_fri          String?
+  open_2_fri           String?
+  close_2_fri          String?
+  open_3_fri           String?
+  close_3_fri          String?
+  open_1_sat           String?
+  close_1_sat          String?
+  open_2_sat           String?
+  close_2_sat          String?
+  open_3_sat           String?
+  close_3_sat          String?
+  open_1_sun           String?
+  close_1_sun          String?
+  open_2_sun           String?
+  close_2_sun          String?
+  open_3_sun           String?
+  close_3_sun          String?
+  loc_type_1           String?                @db.VarChar(3)
+  loc_type_2           String?                @db.VarChar(3)
+  city_name            String?                @db.VarChar(50)
+  category_id          Int?
+  categories           categories?            @relation(fields: [category_id], references: [id])
+  cities               cities?                @relation(fields: [city_code], references: [code], onUpdate: NoAction, map: "location_city_id_fkey")
+  countries            countries?             @relation(fields: [country_code], references: [code], onUpdate: NoAction, map: "location_country_fkey")
+  location_type_1      location_type_1?       @relation(fields: [loc_type_1], references: [type], onDelete: Restrict)
+  location_type_2      location_type_2?       @relation(fields: [loc_type_2], references: [type], onDelete: Restrict)
+  vendors              vendors                @relation(fields: [vendor_id], references: [id])
+  location_description location_description[]
+
+  @@index([category_id], map: "location_category_id_fkey")
+  @@index([city_code], map: "location_city_id_fkey")
+  @@index([country_code], map: "location_country_fkey")
+  @@index([loc_type_1], map: "location_loc_type_1_fkey")
+  @@index([loc_type_2], map: "location_loc_type_2_fkey")
+  @@index([vendor_id], map: "location_vendor_id_fkey")
+}
+model location_description {
+  location_id String
+  locale      String
+  description String
+  address_1   String
+  address_2   String
+  address_3   String
+  location    location @relation(fields: [location_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([location_id, locale])
+}
+
+
+model countries {
+  code                  String                  @id @db.VarChar(5)
+  code_3                String                  @db.VarChar(5)
+  name                  String                  @db.VarChar(50)
+  continent             String                  @db.VarChar(50)
+  currency              String                  @db.VarChar(10)
+  airports              airports[]
+  cities                cities[]
+  countries_translation countries_translation[]
+  location              location[]
+}
+
+model countries_translation {
+  country_code String    @db.VarChar(5)
+  locale       String    @db.VarChar(5)
+  country_name String    @db.VarChar(50)
+  countries    countries @relation(fields: [country_code], references: [code], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([country_code, locale])
+}
+
+model location_type_1 {
+  type        String     @id @db.VarChar(3)
+  description String     @db.VarChar(50)
+  location    location[]
+}
+
+model location_type_2 {
+  type        String     @id @db.VarChar(3)
+  description String     @db.VarChar(50)
+  location    location[]
+}
+
+model vendors {
+  id       String     @id @db.VarChar(2)
+  name     String     @db.VarChar(50)
+  location location[]
+}
+
+model airports {
+  iata_code    String    @db.VarChar(6)
+  country_code String    @db.VarChar(5)
+  icao_code    String    @db.VarChar(6)
+  name         String    @db.VarChar(100)
+  latitude     Int
+  longitude    Int
+  id           Int       @id @default(autoincrement())
+  countries    countries @relation(fields: [country_code], references: [code], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([country_code], map: "airports_country_code_fkey")
+}
+
+model categories {
+  id               Int          @id @default(autoincrement())
+  name             String?      @db.VarChar(100)
+  parent_id        Int?
+  categories       categories?  @relation("categoriesTocategories_parent_id", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "categories_ibfk_1")
+  other_categories categories[] @relation("categoriesTocategories_parent_id")
+  location         location[]
+
+  @@index([parent_id], map: "parent_id")
+}

@@ -1,0 +1,15 @@
+model payment {
+  order_id String @id
+  tel String @db.varChar(20)
+  email String @db.varChar(255)
+  name String @db.varChar(255)
+  price Float
+  pickup_time String
+  pickup_location String
+  dropoff_time String
+  dropoff_location String
+  vehicle_type String
+  vehicle_name String
+  user_id Int?
+  user users? @relation(fields: [user_id], references: [id])
+}

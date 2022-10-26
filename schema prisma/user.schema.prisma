@@ -1,0 +1,10 @@
+model users {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique(map: "email") @db.VarChar(100)
+  hash_pass     String    @db.VarChar(255)
+  created_date  DateTime? @default(now()) @db.DateTime(0)
+  modified_date DateTime? @db.DateTime(0)
+  deleted       Int?      @default(0) @db.TinyInt
+  hash_rt       String?   @db.Text
+  phone         String?   @db.VarChar(20)
+}

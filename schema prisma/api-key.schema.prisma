@@ -1,0 +1,4 @@
+model api_key {
+  client_id String @id
+  key       String @unique
+}

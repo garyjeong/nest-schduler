@@ -1,0 +1,17 @@
+model locales {
+  id          Int           @id @default(autoincrement())
+  name        String
+  code        String        @unique
+  default     Boolean       @default(false)
+  translation translation[]
+}
+
+
+model translation {
+  locale_id Int
+  message   String
+  tag       String  @db.VarChar(255)
+  locales   locales @relation(fields: [locale_id], references: [id])
+
+  @@id([locale_id, tag])
+}

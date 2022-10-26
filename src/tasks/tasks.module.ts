@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { PrismaReadService } from 'src/prisma/prisma.service';
 import { TasksService } from './tasks.service';
 
 @Module({
@@ -9,6 +10,6 @@ import { TasksService } from './tasks.service';
       maxRedirects: 5,
     }),
   ],
-  providers: [TasksService],
+  providers: [TasksService, PrismaReadService],
 })
 export class TasksModule {}

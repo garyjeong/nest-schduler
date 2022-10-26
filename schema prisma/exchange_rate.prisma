@@ -1,0 +1,6 @@
+model exchange_rates {
+  id          String     @id @db.VarChar(50)
+  from_code   String     @db.VarChar(50)
+  to_code     String     @db.VarChar(50)
+  rate        Float      @db.Float
+}

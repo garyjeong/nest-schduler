@@ -1,0 +1,67 @@
+model admin_permissions {
+  id                      Int                       @id @default(autoincrement())
+  action                  String                    @unique(map: "action") @db.VarChar(100)
+  description             String?                   @db.VarChar(255)
+  admin_roles_permissions admin_roles_permissions[]
+}
+
+model admin_roles {
+  id                                               Int                       @id @default(autoincrement())
+  name                                             String                    @db.VarChar(100)
+  description                                      String?                   @db.VarChar(255)
+  created_date                                     DateTime?                 @default(now()) @db.DateTime(0)
+  modified_date                                    DateTime?                 @db.DateTime(0)
+  created_by                                       Int?
+  modified_by                                      Int?
+  deleted                                          Int?                      @default(0) @db.TinyInt
+  admin_users_admin_roles_created_byToadmin_users  admin_users?              @relation("admin_roles_created_byToadmin_users", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_ibfk_1")
+  admin_users_admin_roles_modified_byToadmin_users admin_users?              @relation("admin_roles_modified_byToadmin_users", fields: [modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_ibfk_2")
+  admin_roles_permissions                          admin_roles_permissions[]
+  admin_users_roles                                admin_users_roles[]
+
+  @@index([created_by], map: "created_by")
+  @@index([modified_by], map: "modified_by")
+}
+
+model admin_roles_permissions {
+  permission_id     Int
+  role_id           Int
+  admin_permissions admin_permissions @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_permissions_ibfk_1")
+  admin_roles       admin_roles       @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_permissions_ibfk_2")
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_id")
+}
+
+model admin_users {
+  id                                               Int                 @id @default(autoincrement())
+  username                                         String?             @unique(map: "username") @db.VarChar(50)
+  email                                            String?             @unique(map: "email") @db.VarChar(50)
+  hash_pass                                        String?             @db.VarChar(255)
+  first_name                                       String?             @db.VarChar(100)
+  last_name                                        String              @db.VarChar(100)
+  phone_mobile                                     String?             @db.VarChar(50)
+  address                                          String?             @db.VarChar(255)
+  created_date                                     DateTime?           @default(now()) @db.DateTime(0)
+  modified_date                                    DateTime?           @db.DateTime(0)
+  created_by                                       Int?
+  deleted                                          Int?                @default(0) @db.TinyInt
+  hash_rt                                          String?             @db.Text
+  admin_users                                      admin_users?        @relation("admin_usersToadmin_users_created_by", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_ibfk_1")
+  admin_roles_admin_roles_created_byToadmin_users  admin_roles[]       @relation("admin_roles_created_byToadmin_users")
+  admin_roles_admin_roles_modified_byToadmin_users admin_roles[]       @relation("admin_roles_modified_byToadmin_users")
+  other_admin_users                                admin_users[]       @relation("admin_usersToadmin_users_created_by")
+  admin_users_roles                                admin_users_roles[]
+
+  @@index([created_by], map: "created_by")
+}
+
+model admin_users_roles {
+  user_id     Int
+  role_id     Int
+  admin_roles admin_roles @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_roles_ibfk_2")
+  admin_users admin_users @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_roles_ibfk_1")
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "role_id")
+}

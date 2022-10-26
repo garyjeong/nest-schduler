@@ -1,0 +1,575 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./generated/client-ro"
+  previewFeatures = ["interactiveTransactions"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL_RO")
+}
+
+model api_key {
+  client_id String @id
+  key       String @unique
+}
+
+model cities {
+  code               String               @id @db.VarChar(5)
+  name               String               @db.VarChar(100)
+  un_locode          String?              @db.VarChar(50)
+  latitude           Int?
+  longitude          Int?
+  alt                Int?
+  timezone           String?              @db.VarChar(50)
+  country_code       String?              @db.VarChar(5)
+  countries          countries?           @relation(fields: [country_code], references: [code])
+  cities_translation cities_translation[]
+
+  @@index([country_code], map: "cities_country_code_fkey")
+}
+
+model cities_translation {
+  city_code String @db.VarChar(5)
+  locale    String @db.VarChar(5)
+  city_name String
+  cities    cities @relation(fields: [city_code], references: [code], onDelete: Cascade)
+
+  @@id([city_code, locale])
+}
+
+model locales {
+  id          Int           @id @default(autoincrement())
+  name        String
+  code        String        @unique
+  default     Boolean       @default(false)
+  translation translation[]
+}
+
+model location {
+  id                   String                 @id
+  city_code            String?                @db.VarChar(5)
+  vendor_id            String                 @db.VarChar(2)
+  oag_code             String?
+  country_code         String?                @db.VarChar(5)
+  state                String?
+  zip_code             String?
+  phone                String?
+  alt_phone            String?
+  fax                  String?
+  telex                String?
+  web_url              String?
+  email                String?
+  latitude             String?
+  longitude            String?
+  open_1_mon           String?
+  close_1_mon          String?
+  open_2_mon           String?
+  close_2_mon          String?
+  open_3_mon           String?
+  close_3_mon          String?
+  open_1_tue           String?
+  close_1_tue          String?
+  open_2_tue           String?
+  close_2_tue          String?
+  open_3_tue           String?
+  close_3_tue          String?
+  open_1_wed           String?
+  close_1_wed          String?
+  open_2_wed           String?
+  close_2_wed          String?
+  open_3_wed           String?
+  close_3_wed          String?
+  open_1_thu           String?
+  close_1_thu          String?
+  open_2_thu           String?
+  close_2_thu          String?
+  open_3_thu           String?
+  close_3_thu          String?
+  open_1_fri           String?
+  close_1_fri          String?
+  open_2_fri           String?
+  close_2_fri          String?
+  open_3_fri           String?
+  close_3_fri          String?
+  open_1_sat           String?
+  close_1_sat          String?
+  open_2_sat           String?
+  close_2_sat          String?
+  open_3_sat           String?
+  close_3_sat          String?
+  open_1_sun           String?
+  close_1_sun          String?
+  open_2_sun           String?
+  close_2_sun          String?
+  open_3_sun           String?
+  close_3_sun          String?
+  loc_type_1           String?                @db.VarChar(3)
+  loc_type_2           String?                @db.VarChar(3)
+  city_name            String?                @db.VarChar(50)
+  category_id          String?                @db.VarChar(20)
+  categories           categories?            @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "location_category_fkey")
+  location_type_1      location_type_1?       @relation(fields: [loc_type_1], references: [type], onDelete: NoAction)
+  location_type_2      location_type_2?       @relation(fields: [loc_type_2], references: [type], onDelete: NoAction)
+  vendors              vendors                @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "location_vendor_fkey")
+  location_description location_description[]
+
+  @@unique([vendor_id, oag_code], map: "vendor_oag")
+  @@index([category_id], map: "location_category_fkey")
+  @@index([city_code], map: "location_city_id_fkey")
+  @@index([country_code], map: "location_country_fkey")
+  @@index([loc_type_1], map: "location_loc_type_1_fkey")
+  @@index([loc_type_2], map: "location_loc_type_2_fkey")
+  @@index([vendor_id], map: "location_vendor_id_fkey")
+}
+
+model location_description {
+  location_id String
+  locale      String
+  description String?
+  address_1   String?
+  address_2   String?
+  address_3   String?
+  location    location @relation(fields: [location_id], references: [id], onDelete: Cascade, map: "location_description_location_fkey")
+
+  @@id([location_id, locale])
+}
+
+model translation {
+  locale_id Int
+  message   String  @db.Text
+  tag       String  @db.VarChar(255)
+  locales   locales @relation(fields: [locale_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "locale_id_locale_fkey")
+
+  @@id([locale_id, tag])
+}
+
+model countries {
+  code                  String                  @id @db.VarChar(5)
+  code_3                String                  @db.VarChar(5)
+  name                  String                  @db.VarChar(50)
+  continent             String?                 @db.VarChar(50)
+  currency              String?                 @db.VarChar(10)
+  airports              airports[]
+  cities                cities[]
+  countries_translation countries_translation[]
+}
+
+model countries_translation {
+  country_code String    @db.VarChar(5)
+  locale       String    @db.VarChar(5)
+  country_name String    @db.VarChar(50)
+  countries    countries @relation(fields: [country_code], references: [code], onDelete: Cascade)
+
+  @@id([country_code, locale])
+}
+
+model location_type_1 {
+  type        String     @id @db.VarChar(3)
+  description String     @db.VarChar(50)
+  location    location[]
+}
+
+model location_type_2 {
+  type        String     @id @db.VarChar(3)
+  description String     @db.VarChar(50)
+  location    location[]
+}
+
+model vendors {
+  id                 String               @id @db.VarChar(2)
+  name               String               @db.VarChar(50)
+  logo               String?
+  isActive           Boolean?
+  commission_setting commission_setting[]
+  location           location[]
+  reservation        reservation[]
+}
+
+model airports {
+  iata_code    String     @db.VarChar(6)
+  country_code String?    @db.VarChar(5)
+  icao_code    String     @db.VarChar(6)
+  name         String     @db.VarChar(100)
+  latitude     Int
+  longitude    Int
+  id           Int        @id @default(autoincrement())
+  countries    countries? @relation(fields: [country_code], references: [code])
+
+  @@index([country_code], map: "airports_country_code_fkey")
+}
+
+model categories {
+  id       String     @id @db.VarChar(20)
+  name     String     @db.VarChar(100)
+  icon     String?    @db.VarChar(100)
+  location location[]
+}
+
+model payment {
+  order_id             String       @id
+  user_id              Int?
+  IMS_commission       Decimal?     @db.Decimal(12, 2)
+  agency_id            String?      @db.VarChar(10)
+  agency_name          String?
+  pay_type             String?      @db.VarChar(5)
+  exchange_rate        Decimal?     @db.Decimal(12, 2)
+  first_name           String?      @db.VarChar(255)
+  korean_name          String?      @db.VarChar(255)
+  last_name            String?      @db.VarChar(255)
+  paid_agency          Decimal?     @db.Decimal(12, 2)
+  paid_supplier_date   DateTime?    @db.DateTime(0)
+  paid_supplier        Decimal?     @db.Decimal(12, 2)
+  basic_rate           Decimal?     @db.Decimal(12, 2)
+  net                  Decimal?     @db.Decimal(12, 2)
+  commission           Decimal?     @db.Decimal(12, 2)
+  currency             String?      @db.VarChar(10)
+  service_total_amount Decimal?     @db.Decimal(12, 2)
+  service_rate         Decimal?     @db.Decimal(12, 2)
+  reservation_id       String?      @db.VarChar(255)
+  supplier             String?      @db.VarChar(10)
+  imp_uid              String?      @db.VarChar(50)
+  merchant_uid         String?      @db.VarChar(50)
+  etc_rate             Decimal?     @db.Decimal(12, 2)
+  total_amount         Decimal?     @db.Decimal(12, 2)
+  pg_amount            Decimal?     @db.Decimal(12, 2)
+  paid_agency_date     DateTime?    @db.DateTime(0)
+  reservation          reservation? @relation(fields: [reservation_id], references: [res_id], onDelete: NoAction, onUpdate: NoAction, map: "reservation_fk_1")
+  users                users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_ibfk_1")
+
+  @@index([reservation_id], map: "reservation_fk_1")
+  @@index([user_id], map: "users_ibfk_1")
+}
+
+model exchange_rates {
+  id                    Int                     @id @default(autoincrement())
+  from_code             String                  @db.VarChar(50)
+  to_code               String                  @db.VarChar(50)
+  rate                  Float                   @db.Float
+  exchange_rate_history exchange_rate_history[]
+
+  @@unique([from_code, to_code], map: "exchange_rates_from_code_to_code")
+}
+
+model admin_permissions {
+  id                      Int                       @id @default(autoincrement())
+  action                  String                    @unique(map: "action") @db.VarChar(100)
+  description             String?                   @db.VarChar(255)
+  admin_roles_permissions admin_roles_permissions[]
+}
+
+model admin_roles {
+  id                                               Int                       @id @default(autoincrement())
+  name                                             String                    @db.VarChar(100)
+  description                                      String?                   @db.VarChar(255)
+  created_date                                     DateTime?                 @default(now()) @db.DateTime(0)
+  modified_date                                    DateTime?                 @default(now()) @db.DateTime(0)
+  created_by                                       Int?
+  modified_by                                      Int?
+  deleted                                          Int?                      @default(0) @db.TinyInt
+  admin_users_admin_roles_created_byToadmin_users  admin_users?              @relation("admin_roles_created_byToadmin_users", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_ibfk_1")
+  admin_users_admin_roles_modified_byToadmin_users admin_users?              @relation("admin_roles_modified_byToadmin_users", fields: [modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_ibfk_2")
+  admin_roles_permissions                          admin_roles_permissions[]
+  admin_users_roles                                admin_users_roles[]
+
+  @@index([created_by], map: "created_by")
+  @@index([modified_by], map: "modified_by")
+}
+
+model admin_roles_permissions {
+  permission_id     Int
+  role_id           Int
+  admin_permissions admin_permissions @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_permissions_ibfk_1")
+  admin_roles       admin_roles       @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_roles_permissions_ibfk_2")
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_id")
+}
+
+model admin_users {
+  id                                                     Int                 @id @default(autoincrement())
+  username                                               String?             @unique(map: "username") @db.VarChar(50)
+  email                                                  String?             @unique(map: "email") @db.VarChar(50)
+  hash_pass                                              String?             @db.VarChar(255)
+  first_name                                             String?             @db.VarChar(100)
+  last_name                                              String              @db.VarChar(100)
+  phone_mobile                                           String?             @db.VarChar(50)
+  address                                                String?             @db.VarChar(255)
+  created_date                                           DateTime?           @default(now()) @db.DateTime(0)
+  modified_date                                          DateTime?           @default(now()) @db.DateTime(0)
+  created_by                                             Int?
+  deleted                                                Int?                @default(0) @db.TinyInt
+  hash_rt                                                String?             @db.Text
+  modified_by                                            Int?
+  status                                                 String?             @default("IN_ACTIVE") @db.VarChar(50)
+  agency_id                                              String?             @db.VarChar(10)
+  agencies                                               agencies?           @relation(fields: [agency_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_ibfk_3")
+  admin_users_admin_usersToadmin_users_created_by        admin_users?        @relation("admin_usersToadmin_users_created_by", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_ibfk_1")
+  admin_users_admin_usersToadmin_users_modified_by       admin_users?        @relation("admin_usersToadmin_users_modified_by", fields: [modified_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_ibfk_2")
+  admin_roles_admin_roles_created_byToadmin_users        admin_roles[]       @relation("admin_roles_created_byToadmin_users")
+  admin_roles_admin_roles_modified_byToadmin_users       admin_roles[]       @relation("admin_roles_modified_byToadmin_users")
+  other_admin_users_admin_usersToadmin_users_created_by  admin_users[]       @relation("admin_usersToadmin_users_created_by")
+  other_admin_users_admin_usersToadmin_users_modified_by admin_users[]       @relation("admin_usersToadmin_users_modified_by")
+  admin_users_roles                                      admin_users_roles[]
+
+  @@index([agency_id], map: "admin_users_ibfk_3")
+  @@index([created_by], map: "created_by")
+  @@index([modified_by], map: "modified_by")
+}
+
+model admin_users_roles {
+  user_id     Int
+  role_id     Int
+  admin_roles admin_roles @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_roles_ibfk_2")
+  admin_users admin_users @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_users_roles_ibfk_1")
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "role_id")
+}
+
+model files {
+  id       Int     @id @default(autoincrement())
+  file_key String? @db.VarChar(255)
+  file_url String? @db.VarChar(255)
+}
+
+model settings {
+  category String  @db.VarChar(255)
+  name     String  @db.VarChar(255)
+  value    String? @db.Text
+  type     String? @default("text") @db.VarChar(20)
+
+  @@id([category, name])
+}
+
+model users {
+  id                    Int           @id @default(autoincrement())
+  email                 String        @unique(map: "users_email_uindex") @db.VarChar(100)
+  hash_pass             String?       @db.VarChar(255)
+  created_date          DateTime?     @default(now()) @db.DateTime(0)
+  modified_date         DateTime?     @default(now()) @db.DateTime(0)
+  deleted               Int?          @default(0) @db.TinyInt
+  hash_rt               String?       @db.Text
+  phone                 String?       @db.VarChar(20)
+  login_type            String?       @default("normal") @db.VarChar(50)
+  external_id           String?       @db.VarChar(255)
+  korean_name           String?       @db.VarChar(255)
+  first_name            String?       @db.VarChar(255)
+  last_name             String?       @db.VarChar(255)
+  phone_prefix          String?       @db.VarChar(50)
+  refund_bank           String?       @db.VarChar(255)
+  refund_account_number String?       @db.VarChar(255)
+  refund_account_holder String?       @db.VarChar(255)
+  address               String?       @db.VarChar(255)
+  hertz_membership      String?       @db.VarChar(255)
+  airline               String?       @db.VarChar(255)
+  mileage_number        String?       @db.VarChar(255)
+  mailing_email         Int?          @default(0) @db.TinyInt
+  mailing_text_msg      Int?          @default(0) @db.TinyInt
+  birthdate             String?       @db.VarChar(20)
+  payment               payment[]
+  reservation           reservation[]
+
+  @@unique([phone, phone_prefix], map: "users_phone_phone_prefix_uindex")
+}
+
+model packages {
+  price_id    String      @db.VarChar(50)
+  service_id  String      @db.VarChar(50)
+  price_codes price_codes @relation(fields: [price_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "price_code_fkey")
+  services    services    @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "service_fkey")
+
+  @@id([price_id, service_id])
+  @@index([service_id], map: "service_fkey")
+}
+
+model price_codes {
+  id           String     @id @db.VarChar(255)
+  price_code   String     @db.VarChar(255)
+  country_code String     @db.VarChar(20)
+  name         String?    @db.VarChar(255)
+  price_type   String?    @default("POD") @db.VarChar(20)
+  vendor_id    String?    @db.VarChar(5)
+  ITCode       String?    @db.VarChar(50)
+  cdpNumber    String?    @db.VarChar(50)
+  show         Boolean?
+  insurance    Boolean?
+  ko_name      String?    @db.VarChar(255)
+  packages     packages[]
+
+  @@unique([price_code, country_code], map: "price_code_country")
+}
+
+model reservation {
+  supplier               String?   @db.VarChar(50)
+  agent_name             String?   @db.VarChar(255)
+  agent                  String?   @db.VarChar(255)
+  date_request           DateTime? @default(now()) @db.DateTime(0)
+  res_status             String?   @db.VarChar(255)
+  invoice                String?   @db.VarChar(255)
+  res_id                 String    @id @db.VarChar(255)
+  korean_name            String?   @db.VarChar(255)
+  first_name             String?   @db.VarChar(255)
+  last_name              String?   @db.VarChar(255)
+  pickup_loc             String?   @db.VarChar(255)
+  return_loc             String?   @db.VarChar(255)
+  pickup_datetime        String?   @db.VarChar(255)
+  return_datetime        String?   @db.VarChar(255)
+  pay_type               String?   @db.VarChar(255)
+  currency               String?   @db.VarChar(50)
+  exchange_rate          Decimal?  @default(1000.00) @db.Decimal(7, 2)
+  user_id                Int?
+  car_model              String?   @db.VarChar(255)
+  extra_equipmens        String?
+  insurance_info         String?
+  office_address         String?   @db.VarChar(255)
+  office_name            String?   @db.VarChar(255)
+  office_time            String?   @db.VarChar(255)
+  phone_code             String?   @db.VarChar(50)
+  phone_number           String?   @db.VarChar(50)
+  services               String?
+  size_car               String?   @db.VarChar(50)
+  type_car               String?   @db.VarChar(50)
+  date_cancel            DateTime? @db.DateTime(0)
+  email                  String?   @db.VarChar(255)
+  flight_brand           String?
+  flight_number          String?
+  frequent_flyer         String?
+  hertz_membership       String?   @db.VarChar(50)
+  office_second_address  String?   @db.VarChar(255)
+  office_second_name     String?   @db.VarChar(255)
+  office_second_time     String?   @db.VarChar(255)
+  dropFee                Decimal?  @db.Decimal(12, 2)
+  rate_amount            Decimal?  @db.Decimal(12, 2)
+  rate_foreigner_amount  Decimal?  @db.Decimal(12, 2)
+  tax                    String?
+  total_amount           Decimal?  @db.Decimal(12, 2)
+  total_foreigner_amount Decimal?  @db.Decimal(12, 2)
+  agencies               agencies? @relation(fields: [agent], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "reservation_agency_fkey")
+  vendors                vendors?  @relation(fields: [supplier], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "reservation_vendor_fkey")
+  users                  users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "reservation_user_fk")
+  payment                payment[]
+
+  @@index([agent], map: "reservation_agency_fkey")
+  @@index([user_id], map: "reservation_user_fk")
+  @@index([supplier], map: "reservation_vendor_fkey")
+}
+
+model services {
+  id             String     @id @db.VarChar(50)
+  description    String?    @db.VarChar(255)
+  ko_description String?    @db.VarChar(255)
+  details        String?
+  order          Int?
+  packages       packages[]
+}
+
+model agencies {
+  id                 String               @id @db.VarChar(10)
+  name               String               @db.VarChar(50)
+  logo               String?
+  created_date       DateTime?            @default(now()) @db.DateTime(0)
+  admin_users        admin_users[]
+  commission_setting commission_setting[]
+  reservation        reservation[]
+}
+
+model commission_setting {
+  id               Int      @id @default(autoincrement()) @db.UnsignedInt
+  vendor           String   @db.VarChar(2)
+  agency           String   @db.VarChar(45)
+  payment_type     String   @default("pp") @db.VarChar(5)
+  tag              String   @default("ims") @db.VarChar(45)
+  calculation_type String   @default("percentage") @db.VarChar(45)
+  amount           Decimal  @default(0.10) @db.Decimal(10, 2)
+  agencies         agencies @relation(fields: [agency], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "commission_agency_fkey")
+  vendors          vendors  @relation(fields: [vendor], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "commission_vendor_fkey")
+
+  @@index([agency], map: "commission_agency_fkey")
+  @@index([vendor], map: "commission_vendor_fkey")
+}
+
+model coupons {
+  id                        Int      @id @default(autoincrement())
+  type                      String   @db.VarChar(45)
+  coupon_name               String   @db.VarChar(255)
+  brand                     String   @db.VarChar(50)
+  destination               String   @db.VarChar(255)
+  offer_description         String?  @db.Text
+  corporate_discount_number String   @db.VarChar(45)
+  promotion_code            String   @db.VarChar(45)
+  min_days                  Int
+  car_group                 String   @db.Text
+  pickup_start_time         DateTime @db.DateTime(0)
+  pickup_end_time           DateTime @db.DateTime(0)
+  order_start_time          DateTime @db.DateTime(0)
+  order_end_time            DateTime @db.DateTime(0)
+  issued_count              Int
+  used_count                Int?     @default(0)
+  status                    String   @db.VarChar(10)
+  remark                    String   @db.VarChar(255)
+}
+
+model promotion_code {
+  cdp       String  @db.VarChar(50)
+  pc        String  @db.VarChar(50)
+  vendor_id String  @db.VarChar(10)
+  country   String  @db.VarChar(5)
+  name      String? @db.VarChar(255)
+
+  @@id([country, vendor_id])
+}
+
+model faq {
+  id          Int           @id @default(autoincrement())
+  question_kr String        @db.VarChar(255)
+  question_us String?       @db.VarChar(255)
+  answer_kr   String        @db.Text
+  answer_us   String?       @db.Text
+  status      String?       @db.VarChar(10)
+  sort_order  Int
+  subject_id  Int?
+  subject_faq subject_faq?  @relation(fields: [subject_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "faq_ibfk_1")
+  keyword_faq keyword_faq[]
+
+  @@index([subject_id], map: "subject_id")
+}
+
+model error_messages {
+  error_code      String @id @db.VarChar(10)
+  english_message String @db.VarChar(255)
+  korean_message  String @db.VarChar(255)
+}
+
+model exchange_rate_history {
+  id               Int            @id @default(autoincrement())
+  exchange_rate_id Int
+  rate             Float          @db.Float
+  date             DateTime       @db.DateTime(0)
+  exchange_rates   exchange_rates @relation(fields: [exchange_rate_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "history_exchange_rate_exchange_rate_fkey")
+
+  @@unique([exchange_rate_id, date], map: "history_exchange_rate_exchange_rate_id_date_key")
+  @@index([exchange_rate_id], map: "history_exchange_rate_exchange_rate_fkey")
+}
+
+model subject_faq {
+  id   Int    @id @default(autoincrement())
+  name String
+  faq  faq[]
+}
+
+model keyword_faq {
+  id     Int    @id @default(autoincrement())
+  name   String
+  faq_id Int
+  faq    faq    @relation(fields: [faq_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "keyword_faq_ibfk_1")
+
+  @@index([faq_id], map: "keyword_faq_ibfk_1")
+}
+
+model cities_locations {
+  city_code   String @db.VarChar(5)
+  location_id String
+
+  @@id([city_code, location_id])
+}
